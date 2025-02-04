@@ -17,7 +17,7 @@ function typeReducer(state, action) {
   switch (action.type) {
     case "UPDATE_CURRENT_INDEX": {
       if (state.currentIndex == state.words.length - 1) {
-        return { ...state, isComplete: true };
+        return { ...state, isComplete: true, endTime: Date.now() };
       }
 
       if (state.rightIndex === state.currentIndex) {
@@ -48,11 +48,13 @@ function typeReducer(state, action) {
 
     case "VALIDATE_WORDS": {
       const inputWord = action.payload.inputWord.trim();
-      if (inputWord === state.currentWord) {
-        console.log("Correct Word");
-      } else {
-        console.log("Incorrect Word");
+      if (inputWord !== state.currentWord) {
+        return { ...state, wrongCount: state.wrongCount + 1 };
       }
+    }
+
+    case "SET_START_TIME": {
+      return { ...state, startTime: action.payload.startTime };
     }
 
     default:
@@ -62,30 +64,33 @@ function typeReducer(state, action) {
 
 export function TypeContextProvider({ children }) {
   const [state, dispatch] = useReducer(typeReducer, {
+    startTime: 1,
+    endTime: 0,
     words: content,
     currentWord: content[0],
     currentIndex: 0,
     rightIndex: 3,
     leftIndex: 0,
+    wrongCount: 0,
     isComplete: false,
   });
 
   const values = {
+    startTime: state.startTime,
+    endTime: state.endTime,
     words: state.words,
     currentWord: state.currentWord,
     currentIndex: state.currentIndex,
     rightIndex: state.rightIndex,
     leftIndex: state.leftIndex,
+    wrongCount: state.wrongCount,
     isComplete: state.isComplete,
     updateCurrentIndex: () => dispatch({ type: "UPDATE_CURRENT_INDEX" }),
     validateWords: (inputWord) =>
       dispatch({ type: "VALIDATE_WORDS", payload: { inputWord: inputWord } }),
+    setStartTime: (startTime) =>
+      dispatch({ type: "SET_START_TIME", payload: { startTime: startTime } }),
   };
 
   return <TypeContext.Provider value={values}>{children}</TypeContext.Provider>;
 }
-// current word , current word index ,right index
-// if current index == right index words change
-// current word highlight css
-// feedback milenga space dabneke baad current word usko css denge ,uske baad current word update karenge
-// if current word not is equal to

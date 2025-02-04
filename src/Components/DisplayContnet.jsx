@@ -1,18 +1,22 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
-import { TypeContext } from "../Store/typeContext";
+import { TypeContext } from "../Store/TypeContext";
 
 const DisplayContnet = () => {
   const {
     words,
     leftIndex,
-    currentIndex,
     rightIndex,
     currentWord,
+    wrongCount,
     isComplete,
     updateCurrentIndex,
     validateWords,
+    setStartTime,
+    startTime,
+    endTime,
   } = useContext(TypeContext);
   const [inputVal, setInputVal] = useState("");
+  const [isTestStart, setIsTestStart] = useState(false);
   const inputValRef = useRef(inputVal);
   const wordsToDisplay = words.slice(leftIndex, rightIndex + 1);
 
@@ -23,7 +27,6 @@ const DisplayContnet = () => {
 
   const handleKeyDown = (event) => {
     if (event.code === "Space" || event.key === " ") {
-      console.log("handleKeyDown:-", inputValRef.current);
       validateWords(inputValRef.current);
       updateCurrentIndex();
       setInputVal("");
@@ -31,6 +34,11 @@ const DisplayContnet = () => {
   };
 
   function handleOnChange(event) {
+    if (!isTestStart && !startTime) {
+      console.log("setStartTime was called");
+      setStartTime(Date.now());
+      setIsTestStart(true);
+    }
     setInputVal(event.target.value);
   }
 
@@ -62,7 +70,18 @@ const DisplayContnet = () => {
         onChange={(e) => handleOnChange(e)}
         value={inputVal}
       />
-      {isComplete && <div>Test Completed !</div>}
+      {isComplete && (
+        <div>
+          Test Completed !{" "}
+          <p>
+            Total Accuracy :{" "}
+            {((words.length - wrongCount) * 100) / words.length}
+          </p>
+          <p>StartTime: {startTime}</p>
+          <p>EndTime : {endTime}</p>
+          <p>{words.length / (endTime - startTime) / 60000}</p>
+        </div>
+      )}
     </div>
   );
 };
